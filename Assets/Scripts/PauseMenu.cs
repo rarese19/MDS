@@ -9,6 +9,8 @@ public class PauseMenu : MonoBehaviour
 
     [SerializeField] GameObject pauseMenu;
     [SerializeField] GameObject optionsPanel;
+    [SerializeField] GameObject keybindsMenu;
+
     
     void Update()
     {
@@ -16,11 +18,15 @@ public class PauseMenu : MonoBehaviour
         {
             if (isGamePaused)
             {
-                if (!optionsPanel.activeSelf)
+                if (pauseMenu.activeSelf)
                     ResumeGame();
-                else {
+                else if (optionsPanel.activeSelf){
                     optionsPanel.SetActive(false);
                     pauseMenu.SetActive(true);
+                }
+                else {
+                    keybindsMenu.SetActive(false);
+                    optionsPanel.SetActive(true);
                 }
             }
             else
