@@ -8,6 +8,7 @@ public class PauseMenu : MonoBehaviour
     public static bool isGamePaused = false;
 
     [SerializeField] GameObject pauseMenu;
+    [SerializeField] GameObject optionsPanel;
     
     void Update()
     {
@@ -15,7 +16,12 @@ public class PauseMenu : MonoBehaviour
         {
             if (isGamePaused)
             {
-                ResumeGame();
+                if (!optionsPanel.activeSelf)
+                    ResumeGame();
+                else {
+                    optionsPanel.SetActive(false);
+                    pauseMenu.SetActive(true);
+                }
             }
             else
             {
