@@ -6,6 +6,8 @@ public class Enemy : Interactable
 {
     private int health;
 
+    public GameObject gameObject;
+
     public void Start()
     {
         health = 100;
@@ -15,6 +17,8 @@ public class Enemy : Interactable
         if(health > 0)
         {
             health -= value;
+            if (health <= 0) 
+                Destroy(gameObject);
             Debug.Log("Enemy's health = " +  health);
         }
         else
