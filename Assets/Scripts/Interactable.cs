@@ -13,7 +13,7 @@ public abstract class Interactable : MonoBehaviour
         Interact(value);
     }
 
-    protected virtual void Interact(int value = 0)
+    public virtual void Interact(int value = 0)
     {
 
     }

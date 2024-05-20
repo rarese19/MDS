@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Enemy : Interactable
 {
-    private int health;
+    public int health;
 
     public GameObject gameObject;
 
@@ -12,7 +12,7 @@ public class Enemy : Interactable
     {
         health = 100;
     }
-    protected override void Interact(int value = 0)
+    public override void Interact(int value = 0)
     {
         if(health > 0)
         {
