@@ -9,6 +9,7 @@ TagManager:
   - SecondCamera
   - BulletSpawn
   - Weapon
+  - Ground
   layers:
   - Default
   - TransparentFX
@@ -20,7 +21,7 @@ TagManager:
   - 
   - 
   - Enemy
-  - 
+  - Stair
   - 
   - 
   - 
