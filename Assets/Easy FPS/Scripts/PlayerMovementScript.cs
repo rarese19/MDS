@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+
 [RequireComponent(typeof(Rigidbody))]
+
 public class PlayerMovementScript : MonoBehaviour {
 	Rigidbody rb;
 
@@ -14,17 +16,26 @@ public class PlayerMovementScript : MonoBehaviour {
 	[Tooltip("Position of the camera inside the player")]
 	[HideInInspector]public Vector3 cameraPosition;
 
-	/*
+    [Header("Player Step Climb")]
+    [SerializeField] GameObject stepRayUpper;
+    [SerializeField] GameObject stepRayLower;
+    [SerializeField] float stepHeight = 0.3f;
+    [SerializeField] float stepSmooth = 0.1f;
+
+    private int stairLayer;
+
+    /*
 	 * Getting the Players rigidbody component.
 	 * And grabbing the mainCamera from Players child transform.
 	 */
-	void Awake(){
+    void Awake(){
 		rb = GetComponent<Rigidbody>();
-		cameraMain = transform.Find("Main Camera").transform;
+        stepRayUpper.transform.position = new Vector3(stepRayUpper.transform.position.x, stepHeight, stepRayUpper.transform.position.z);
+        cameraMain = transform.Find("Main Camera").transform;
 		bulletSpawn = cameraMain.Find ("BulletSpawn").transform;
 		ignoreLayer = 1 << LayerMask.NameToLayer ("Player");
-
-	}
+        stairLayer = LayerMask.NameToLayer("Stair");
+    }
 	private Vector3 slowdownV;
 	private Vector2 horizontalMovement;
 	/*
@@ -34,12 +45,55 @@ public class PlayerMovementScript : MonoBehaviour {
 		RaycastForMeleeAttacks ();
 
 		PlayerMovementLogic ();
-	}
-	/*
+
+        stepClimb();
+
+        CheckStairCollision();
+    }
+
+    void CheckStairCollision()
+    {
+        RaycastHit hit;
+        float rayDistance = 0.1f;
+
+        Vector3 rayOrigin = stepRayLower.transform.position;
+        Vector3 rayDirection = transform.TransformDirection(Vector3.forward);
+
+        if (Physics.Raycast(rayOrigin, rayDirection, out hit, rayDistance, 1 << stairLayer))
+        {
+            Vector3 upperRayOrigin = stepRayUpper.transform.position;
+            if (!Physics.Raycast(upperRayOrigin, rayDirection, rayDistance))
+            {
+                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+            }
+        }
+
+        Vector3 rayDirection45 = transform.TransformDirection(1.5f, 0, 1);
+        Vector3 rayDirectionMinus45 = transform.TransformDirection(-1.5f, 0, 1);
+
+        if (Physics.Raycast(rayOrigin, rayDirection45, out hit, rayDistance, 1 << stairLayer))
+        {
+            Vector3 upperRayOrigin45 = stepRayUpper.transform.position;
+            if (!Physics.Raycast(upperRayOrigin45, rayDirection45, rayDistance))
+            {
+                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+            }
+        }
+
+        if (Physics.Raycast(rayOrigin, rayDirectionMinus45, out hit, rayDistance, 1 << stairLayer))
+        {
+            Vector3 upperRayOriginMinus45 = stepRayUpper.transform.position;
+            if (!Physics.Raycast(upperRayOriginMinus45, rayDirectionMinus45, rayDistance))
+            {
+                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+            }
+        }
+    }
+    /*
 	* Accordingly to input adds force and if magnitude is bigger it will clamp it.
 	* If player leaves keys it will deaccelerate
 	*/
-	void PlayerMovementLogic(){
+    void PlayerMovementLogic(){
 		currentSpeed = rb.velocity.magnitude;
 		horizontalMovement = new Vector2 (rb.velocity.x, rb.velocity.z);
 		if (horizontalMovement.magnitude > maxSpeed){
@@ -85,6 +139,7 @@ public class PlayerMovementScript : MonoBehaviour {
 				print ("Missig jump sound.");
 			_walkSound.Stop ();
 			_runSound.Stop ();
+
 		}
 	}
 	/*
@@ -186,21 +241,40 @@ public class PlayerMovementScript : MonoBehaviour {
 
 	[Tooltip("Tells us weather the player is grounded or not.")]
 	public bool grounded;
-	/*
+    /*
 	* checks if our player is contacting the ground in the angle less than 60 degrees
 	*	if it is, set groudede to true
 	*/
-	void OnCollisionStay(Collision other){
-		foreach(ContactPoint contact in other.contacts){
-			if(Vector2.Angle(contact.normal,Vector3.up) < 60){
-				grounded = true;
-			}
-		}
-	}
-	/*
+
+    void OnCollisionStay(Collision other)
+    {
+        foreach (ContactPoint contact in other.contacts)
+        {
+            if (Vector2.Angle(contact.normal, Vector3.up) < 60)
+            {
+                grounded = true;
+            }
+        }
+    }
+
+    void OnCollisionEnter(Collision other)
+    {
+        foreach (ContactPoint contact in other.contacts)
+        {
+            if (Vector2.Angle(contact.normal, Vector3.up) < 60)
+            {
+                grounded = true;
+                if (_jumpSound && _jumpSound.isPlaying)
+                {
+                    _jumpSound.Stop();
+                }
+            }
+        }
+    }
+    /*
 	* On collision exit set grounded to false
 	*/
-	void OnCollisionExit ()
+    void OnCollisionExit ()
 	{
 		grounded = false;
 	}
@@ -338,5 +412,43 @@ public class PlayerMovementScript : MonoBehaviour {
 	public AudioSource _walkSound;
 	[Tooltip("Run Sound player makes.")]
 	public AudioSource _runSound;
+
+
+	
+
+    void stepClimb()
+    {
+        RaycastHit hitLower;
+        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitLower, 0.1f))
+        {
+            RaycastHit hitUpper;
+            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(Vector3.forward), out hitUpper, 0.2f))
+            {
+                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+            }
+        }
+
+        RaycastHit hitLower45;
+        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(1.5f, 0, 1), out hitLower45, 0.1f))
+        {
+
+            RaycastHit hitUpper45;
+            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(1.5f, 0, 1), out hitUpper45, 0.2f))
+            {
+                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+            }
+        }
+
+        RaycastHit hitLowerMinus45;
+        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(-1.5f, 0, 1), out hitLowerMinus45, 0.1f))
+        {
+
+            RaycastHit hitUpperMinus45;
+            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(-1.5f, 0, 1), out hitUpperMinus45, 0.2f))
+            {
+                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+            }
+        }
+    }
 }
 
