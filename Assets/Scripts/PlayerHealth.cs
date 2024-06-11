@@ -20,12 +20,12 @@ public class PlayerHealth : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.PageDown)) {
+        if (Input.GetKey(KeyCode.PageDown)) {
             TakeDamage(20);
         }
     }
 
-    void TakeDamage(int damage) {
+    public void TakeDamage(int damage) {
         currentHealth -= damage;
 
         healthBar.SetHealth(currentHealth);
