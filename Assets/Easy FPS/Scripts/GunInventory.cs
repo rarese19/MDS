@@ -271,4 +271,15 @@ public class GunInventory : MonoBehaviour {
 	[Header("Sounds")]
 	[Tooltip("Sound of weapon changing.")]
 	public AudioSource weaponChanging;
+
+    public void AddWeapon(string weaponName)
+    {
+        if (!gunsIHave.Contains(weaponName))
+        {
+            gunsIHave.Add(weaponName);
+			currentGunCounter = 2;
+            StartCoroutine("Spawn", currentGunCounter);
+            StartCoroutine("UpdateIconsFromResources");
+        }
+    }
 }
