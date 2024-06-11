@@ -14,12 +14,12 @@ public class Enemy : Interactable
     }
     public override void Interact(int value = 0)
     {
-        if(health > 0)
+        if (health > 0)
         {
             health -= value;
-            if (health <= 0) 
+            if (health <= 0)
                 Destroy(gameObject);
-            Debug.Log("Enemy's health = " +  health);
+            Debug.Log("Enemy's health = " + health);
         }
         else
         {
