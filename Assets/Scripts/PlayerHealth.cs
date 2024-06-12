@@ -31,6 +31,8 @@ public class PlayerHealth : MonoBehaviour
         healthBar.SetHealth(currentHealth);
 
         if (currentHealth <= 0) {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
             SceneManager.LoadScene(2);
         }
     }
