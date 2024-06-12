@@ -12,6 +12,7 @@ public class WaveManager : MonoBehaviour
 
     public GameObject enemyPrefab;  // Reference to the enemy Prefab
     public Transform[] spawnPoints; // Array of spawn points
+    public Path[] paths;
 
     void Start()
     {
@@ -32,9 +33,10 @@ public class WaveManager : MonoBehaviour
         while (currentWave < totalWaves)
         {
             currentWave++;
+            Debug.Log("wave: " + currentWave);
             SpawnWave();
             // Wait until all enemies are dead before starting the next wave
-            yield return new WaitUntil(() => currentEnemies.Count == 0);
+            yield return new WaitUntil(() => currentEnemies.Count == 1);
         }
         objectiveManager.CompleteObjective();
     }
@@ -49,16 +51,32 @@ public class WaveManager : MonoBehaviour
         Debug.Log(objectiveManager.description.text);
         for (int i = 0; i < numberOfEnemies; i++)
         {
+            int rand = Random.Range(0, spawnPoints.Length);
+
             // Randomly select a spawn point
-            Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+            Transform spawnPoint = spawnPoints[rand];
 
             // Instantiate enemy at the spawn point's position and rotation
             GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
             currentEnemies.Add(enemy);
 
             // Ensure enemies notify when they are destroyed
-            //enemy.GetComponent<Enemy>().OnDestroyed += HandleEnemyDestroyed;
+            Enemy enemyComponent = enemy.GetComponent<Enemy>();
+            if (enemyComponent != null)
+            {
+                enemyComponent.OnDestroyed += HandleEnemyDestroyed;
+            }
+
+            // Assign a random path to the enemy's EnemyAI component
+            EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
+            if (enemyAI != null)
+            {
+                Path randomPath = paths[rand];
+                enemyAI.path = randomPath;
+            }
         }
+
+        Debug.Log("Wave " + currentWave + " spawned with " + numberOfEnemies + " enemies.");
     }
 
     void OnTriggerEnter(Collider other)
@@ -70,5 +88,20 @@ public class WaveManager : MonoBehaviour
                 Iniciate();
             }
         }
+    }
+
+    void HandleEnemyDestroyed()
+    {
+        // Find the enemy that was destroyed in the list and remove i
+
+        for (int i = currentEnemies.Count - 1; i >= 0; i--)
+        {
+            if (currentEnemies[i] == null)  // Enemy is destroyed, so it's null
+            {
+                currentEnemies.RemoveAt(i);
+            }
+        }
+        Debug.Log(currentEnemies.Count);
+        
     }
 }

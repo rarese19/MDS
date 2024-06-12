@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Enemy : Interactable
@@ -7,6 +9,7 @@ public class Enemy : Interactable
     public int health;
 
     public GameObject gameObject;
+    public event Action OnDestroyed;
 
     public void Start()
     {
@@ -24,6 +27,13 @@ public class Enemy : Interactable
         else
         {
             Debug.Log("Enemy has died.");
+        }
+    }
+    void OnDestroy()
+    {
+        if (OnDestroyed != null)
+        {
+            OnDestroyed.Invoke();
         }
     }
 }
