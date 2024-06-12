@@ -260,6 +260,74 @@ The `LateUpdate` method is called once per frame but after all `Update` methods 
 ## State Pattern
 The State pattern is a behavioral design pattern that allows an object to alter its behavior when its internal state changes. This pattern is particularly useful in game development, where game objects often have multiple states that dictate their behavior. We used this pattern in designing the enemy behavior in our game.
 
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+
+public class EnemyAI : MonoBehaviour
+{
+    private StateMachine stateMachine;
+    private NavMeshAgent agent;
+    private GameObject player;
+    public NavMeshAgent Agent { get { return agent; } }
+    public GameObject Player { get { return player; } }
+    public Path path;
+
+    [Header("Sight Values")]
+    public float sightDistance = 20f;
+    public float fieldOfView = 85f;
+
+    [Header("Weapon Values")]
+    [Range(0.1f, 10f)]
+    public float fireRate;
+    public Transform gunBarrel;
+
+    [SerializeField]
+    private string currentState;
+    
+    void Start()
+    {
+        stateMachine = GetComponent<StateMachine>();
+        agent = GetComponent<NavMeshAgent>();
+        stateMachine.Initialise();
+        player = GameObject.FindGameObjectWithTag("Player");
+    }
+
+    void Update()
+    {
+        CanSeePlayer();
+        currentState = stateMachine.activeState.ToString();
+    }
+
+    public bool CanSeePlayer()
+    {
+        if (player != null)
+        {
+            if (Vector3.Distance(transform.position, player.transform.position) < sightDistance)
+            {
+                Vector3 targetDirection = player.transform.position - transform.position;
+                float angleToPlayer = Vector3.Angle(targetDirection, transform.forward);
+                if (angleToPlayer >= -fieldOfView && angleToPlayer <= fieldOfView)
+                {
+                    Ray ray = new Ray(transform.position, targetDirection);
+                    RaycastHit hitInfo = new RaycastHit();
+                    if (Physics.Raycast(ray, out hitInfo, sightDistance))
+                    {
+                        if (hitInfo.transform.gameObject == player)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+}
+
+```
 <a name="ai"></a>
 # Using an AI tool
 While developing the game, we used ChatGPT to assist us in creating different scripts, and maybe even explaining some Unity features that we did not understand on our own. Even though we did use it, we can say that it is not the best tool for game development, and not to expect too much from it because it's capabilities are limited. It can be useful for some basic scripts, but for more complex ones it might not be the best choice. We found YouTube tutorials to be a lot more helpful than ChatGPT.
