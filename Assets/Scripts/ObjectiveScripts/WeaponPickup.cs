@@ -3,6 +3,7 @@ using UnityEngine;
 public class WeaponPickup : MonoBehaviour
 {
     private ObjectiveManager objectiveManager;
+    public GameObject gun;
 
     void Start()
     {
@@ -23,6 +24,10 @@ public class WeaponPickup : MonoBehaviour
                     gunInventory.AddWeapon("NewGun_semi");
                     gunInventory.AddWeapon("NewGun_auto");
                     Destroy(gameObject); // Destroy the pickup after it has been collected
+                    if(gun != null)
+                    {
+                        Destroy(gun);
+                    }
                 }
             }
             
